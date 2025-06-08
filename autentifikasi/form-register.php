@@ -7,7 +7,6 @@ if (isAuthenticated()) {
     header('Location: ../beranda/index.php');
     exit;
 }
-
 // --- Logika generate CAPTCHA (Server-side) ---
 // Generate CAPTCHA new if not set or needed after POST error
 if (!isset($_SESSION['captcha_code']) || ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['error']))) {

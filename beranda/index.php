@@ -35,12 +35,12 @@ $for_you_movies = array_slice($movies, 1, 10); // A different slice for variety 
             </div>
             <ul class="nav-links">
                 <li class="active"><a href="#"><i class="fas fa-home"></i> <span>Home</span></a></li>
+                <?php if ($user): ?>
                 <li><a href="../favorite/index.php"><i class="fas fa-heart"></i> <span>Favourites</span></a></li>
                 <li><a href="../review/index.php"><i class="fas fa-star"></i> <span>Review</span></a></li>
                 <li><a href="../manage/indeks.php"><i class="fas fa-film"></i> <span>Manage</span></a></li>
-                 <?php if ($user): ?>
-                 <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
-                 <?php endif; ?>
+                <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                <?php endif; ?>
             </ul>
             <div class="bottom-links">
                 <ul>

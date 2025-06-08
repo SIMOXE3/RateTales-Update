@@ -33,21 +33,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username_input_post = trim($_POST['username'] ?? '');
     $password_input = $_POST['password'] ?? '';
     $captcha_input_post = trim($_POST['captcha_input'] ?? '');
+    $remember_me = isset($_POST['remember_me']);
 
-     // Store inputs in session in case of redirect (for UX)
-     $_SESSION['login_username_input'] = $username_input_post;
-     $_SESSION['login_captcha_input'] = $captcha_input_post; // Note: This will be cleared on page load, but useful for debugging
+    // Store inputs in session in case of redirect (for UX)
+    $_SESSION['login_username_input'] = $username_input_post;
 
     // --- Validasi Server-side (Basic) ---
-    if (empty($username_input_post) || empty($password_input) || empty($captcha_input_post)) {
-        $_SESSION['error'] = 'Username/Email, Password, and CAPTCHA are required.';
-        header('Location: form-login.php'); // Redirect back to show error and new CAPTCHA
+    $errors = [];
+    if (empty($username_input_post)) {
+        $errors[] = 'Username/Email wajib diisi.';
+    }
+    if (empty($password_input)) {
+        $errors[] = 'Password wajib diisi.';
+    }
+    if (empty($captcha_input_post)) {
+        $errors[] = 'CAPTCHA wajib diisi.';
+    }
+
+    if (!empty($errors)) {
+        $_SESSION['error'] = implode('<br>', $errors);
+        header('Location: form-login.php');
         exit;
     }
 
     // --- Validasi CAPTCHA (Server-side) ---
     if (!isset($_SESSION['captcha_code']) || strtolower($captcha_input_post) !== strtolower($_SESSION['captcha_code'])) {
-        $_SESSION['error'] = 'Invalid CAPTCHA.';
+        $_SESSION['error'] = 'Kode CAPTCHA yang Anda masukkan tidak valid.';
         // CAPTCHA already regenerated at the top if there was an error before CAPTCHA check
         header('Location: form-login.php'); // Redirect back to show error and new CAPTCHA
         exit; // Stop execution if CAPTCHA is wrong
@@ -60,34 +71,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- Lanjutkan proses login ---
     try {
         // Cek pengguna berdasarkan username atau email
-        $stmt = $pdo->prepare("SELECT user_id, password FROM users WHERE username = ? OR email = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1");
         $stmt->execute([$username_input_post, $username_input_post]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Verifikasi password
+        // Verifikasi password dan status akun
         if ($user && password_verify($password_input, $user['password'])) {
-            // Password correct, set session user_id
+            // Password benar, set session data
             $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['full_name'] = $user['full_name'];
 
-            // Regenerate session ID after successful login to prevent Session Fixation Attacks
+            // Regenerate session ID untuk mencegah Session Fixation Attacks
             session_regenerate_id(true);
 
-            // Redirect to intended URL if set, otherwise to beranda
+            // Update last login time (opsional)
+            $update_stmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE user_id = ?");
+            $update_stmt->execute([$user['user_id']]);
+
+            // Redirect ke halaman yang dituju atau beranda
             $redirect_url = '../beranda/index.php';
             if (isset($_SESSION['intended_url'])) {
                 $redirect_url = $_SESSION['intended_url'];
-                unset($_SESSION['intended_url']); // Clear the intended URL
+                unset($_SESSION['intended_url']); // Hapus URL yang dituju
             }
 
             header('Location: ' . $redirect_url);
             exit;
 
         } else {
-            // Username/Email or password incorrect
-            $_SESSION['error'] = 'Incorrect Username/Email or password.';
-             // Ensure CAPTCHA is regenerated for the next attempt
+            // Username/Email atau password salah
+            $_SESSION['error'] = 'Username/Email atau password yang Anda masukkan salah.';
+            // Regenerasi CAPTCHA untuk percobaan berikutnya
             if (!isset($_SESSION['captcha_code'])) {
-                 $_SESSION['captcha_code'] = generateRandomString(6);
+                $_SESSION['captcha_code'] = generateRandomString(6);
             }
             header('Location: form-login.php');
             exit;
@@ -95,10 +112,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } catch (PDOException $e) {
         error_log("Database error during login: " . $e->getMessage());
-        $_SESSION['error'] = 'An internal error occurred. Please try again.';
-         if (!isset($_SESSION['captcha_code'])) {
-             $_SESSION['captcha_code'] = generateRandomString(6);
-         }
+        $_SESSION['error'] = 'Terjadi kesalahan internal. Silakan coba lagi nanti.';
+        if (!isset($_SESSION['captcha_code'])) {
+            $_SESSION['captcha_code'] = generateRandomString(6);
+        }
         header('Location: form-login.php');
         exit;
     }
