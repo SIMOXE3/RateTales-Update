@@ -2,13 +2,8 @@
 // review/index.php
 require_once '../includes/config.php'; // Include config.php
 
-// Check if user is authenticated
-$isAuthenticated = isAuthenticated();
-$userId = null;
-
-if ($isAuthenticated) {
-    $userId = $_SESSION['user_id'];
-}
+// Redirect if not authenticated (optional, but good practice for review section)
+redirectIfNotAuthenticated();
 
 // Fetch all movies from the database
 $movies = getAllMovies(); // This function now fetches average_rating and genres
@@ -31,20 +26,14 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
             </div>
             <ul class="nav-links">
                 <li><a href="../beranda/index.php"><i class="fas fa-home"></i> <span>Home</span></a></li>
-                <?php if ($isAuthenticated): ?>
                 <li><a href="../favorite/index.php"><i class="fas fa-heart"></i> <span>Favourites</span></a></li>
                 <li class="active"><a href="#"><i class="fas fa-star"></i> <span>Review</span></a></li>
                 <li><a href="../manage/indeks.php"><i class="fas fa-film"></i> <span>Manage</span></a></li>
-                <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
-                <?php endif; ?>
+                 <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
             </ul>
             <div class="bottom-links">
                 <ul>
-                    <?php if ($isAuthenticated): ?>
                     <li><a href="../autentikasi/logout.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
-                    <?php else: ?>
-                    <li><a href="../autentifikasi/form-login.php"><i class="fas fa-sign-in-alt"></i> <span>Login</span></a></li>
-                    <?php endif; ?>
                 </ul>
             </div>
         </nav>

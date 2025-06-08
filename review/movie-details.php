@@ -2,15 +2,12 @@
 // review/movie-details.php
 require_once '../includes/config.php'; // Include config.php
 
-// Check if user is authenticated
-$isAuthenticated = isAuthenticated();
-$userId = null;
-$user = null;
+// Redirect if not authenticated
+redirectIfNotAuthenticated();
 
-if ($isAuthenticated) {
-    $userId = $_SESSION['user_id'];
-    $user = getAuthenticatedUser(); // Fetch user details for comments
-}
+// Get authenticated user ID
+$userId = $_SESSION['user_id'];
+$user = getAuthenticatedUser(); // Fetch user details for comments (username, profile_image)
 
 // Get movie ID from URL parameter
 $movieId = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT);
@@ -40,11 +37,6 @@ $isFavorited = isMovieFavorited($movieId, $userId);
 
 // Handle comment and rating submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
-    if (!$isAuthenticated) {
-        $_SESSION['intended_url'] = "movie-details.php?id={$movieId}";
-        header('Location: ../autentifikasi/form-login.php');
-        exit;
-    }
     $commentText = trim($_POST['comment'] ?? '');
     $submittedRating = filter_var($_POST['rating'] ?? null, FILTER_VALIDATE_FLOAT);
 
@@ -67,11 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_review'])) {
 
 // Handle Favorite/Unfavorite action (using POST for robustness)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_favorite'])) {
-    if (!$isAuthenticated) {
-        $_SESSION['intended_url'] = "movie-details.php?id={$movieId}";
-        header('Location: ../autentifikasi/form-login.php');
-        exit;
-    }
     $action = $_POST['toggle_favorite']; // 'favorite' or 'unfavorite'
     $targetMovieId = filter_var($_POST['movie_id'] ?? null, FILTER_VALIDATE_INT);
 

@@ -141,7 +141,7 @@ unset($_SESSION['error_message']);
                                 <div class="movie-actions">
                                      <!-- Edit Button -->
                                      <a href="edit.php?id=<?php echo $movie['movie_id']; ?>" class="action-btn" title="Edit Movie">
-                                         <i class="fas fa-pencil"></i>
+                                         <i class="fas fa-pen"></i>
                                      </a>
                                      <!-- Delete Button -->
                                      <form action="indeks.php" method="POST" onsubmit="return confirm('Are you sure you want to delete the movie &quot;<?php echo htmlspecialchars($movie['title']); ?>&quot;? This action cannot be undone.');">
