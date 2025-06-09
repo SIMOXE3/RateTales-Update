@@ -10,7 +10,7 @@ if (isAuthenticated()) {
 // --- Logika generate CAPTCHA (Server-side) ---
 // Generate CAPTCHA new if not set or needed after POST error
 if (!isset($_SESSION['captcha_code']) || ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['error']))) {
-     $_SESSION['captcha_code'] = generateRandomString(6);
+    $_SESSION['captcha_code'] = generateRandomString(6);
 }
 
 // --- Proses Form Register ---
@@ -49,14 +49,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $captcha_input_post = trim($_POST['captcha_input'] ?? ''); // Trim captcha input too
     $agree_post = isset($_POST['agree']);
 
-     // Store inputs in session in case of redirect (for UX on error)
-     $_SESSION['register_full_name'] = $full_name_post;
-     $_SESSION['register_username'] = $username_post;
-     $_SESSION['register_age'] = $age_input_post;
-     $_SESSION['register_gender'] = $gender_post;
-     $_SESSION['register_email'] = $email_post;
-     $_SESSION['register_captcha_input'] = $captcha_input_post; // Cleared on page load, but available briefly
-     $_SESSION['register_agree'] = $agree_post;
+    // Store inputs in session in case of redirect (for UX on error)
+    $_SESSION['register_full_name'] = $full_name_post;
+    $_SESSION['register_username'] = $username_post;
+    $_SESSION['register_age'] = $age_input_post;
+    $_SESSION['register_gender'] = $gender_post;
+    $_SESSION['register_email'] = $email_post;
+    $_SESSION['register_captcha_input'] = $captcha_input_post; // Cleared on page load, but available briefly
+    $_SESSION['register_agree'] = $agree_post;
 
 
     // --- Validasi Server-side ---
@@ -92,13 +92,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Validate Email Format (basic)
     if (!filter_var($email_post, FILTER_VALIDATE_EMAIL)) {
-         $errors[] = 'Invalid Email format.';
+        $errors[] = 'Invalid Email format.';
     }
-
-    // Validate Username format (optional: allow only letters, numbers, underscore)
-    // if (!preg_match('/^[a-zA-Z0-9_]+$/', $username_post)) {
-    //     $errors[] = 'Username can only contain letters, numbers, and underscores.';
-    // }
 
 
     // --- Validasi CAPTCHA (Server-side) - This is the crucial security check ---
@@ -118,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['error'] = implode('<br>', $errors);
         // Ensure CAPTCHA is regenerated if it wasn't already due to CAPTCHA failure
         if (!isset($_SESSION['captcha_code'])) { // Cek again if it wasn't regenerated already
-             $_SESSION['captcha_code'] = generateRandomString(6);
+            $_SESSION['captcha_code'] = generateRandomString(6);
         }
         header('Location: form-register.php');
         exit;
@@ -132,29 +127,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt_check->execute([$username_post, $email_post]);
         if ($stmt_check->fetchColumn() > 0) {
             $_SESSION['error'] = 'Username or email is already registered.';
-             // Regenerate CAPTCHA on database check failure
+            // Regenerate CAPTCHA on database check failure
             $_SESSION['captcha_code'] = generateRandomString(6);
             header('Location: form-register.php');
             exit;
         }
 
-        // Hash password
-        $hashed_password = password_hash($password_post, PASSWORD_BCRYPT);
+
 
         // Save new user to database using the createUser function from config/database.php
         $inserted = createUser(
             $full_name_post,
             $username_post,
             $email_post,
-            $hashed_password,
+            $password_post,
             $age, // Use the validated integer age
             $gender_post
-            // profile_image and bio are null by default in createUser function
         );
 
 
         if ($inserted) {
-             // Get the ID of the newly created user
             $userId = $pdo->lastInsertId();
             $_SESSION['user_id'] = $userId;
 
@@ -173,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . $redirect_url); // Redirect to beranda or intended page
             exit;
         } else {
-             // This else block might be hit if execute returns false for other reasons
+            // This else block might be hit if execute returns false for other reasons
             $_SESSION['error'] = 'Failed to create user account.';
             if (!isset($_SESSION['captcha_code'])) {
                 $_SESSION['captcha_code'] = generateRandomString(6);
@@ -181,14 +173,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: form-register.php');
             exit;
         }
-
-
     } catch (PDOException $e) {
         error_log("Database error during registration: " . $e->getMessage());
         $_SESSION['error'] = 'An internal error occurred during registration. Please try again.';
-         if (!isset($_SESSION['captcha_code'])) {
-             $_SESSION['captcha_code'] = generateRandomString(6);
-         }
+        if (!isset($_SESSION['captcha_code'])) {
+            $_SESSION['captcha_code'] = generateRandomString(6);
+        }
         header('Location: form-register.php');
         exit;
     }
@@ -209,15 +199,17 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="../gambar/Untitled142_20250310223718.png">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <title>Rate Tales - Register</title>
 </head>
+
 <body>
     <div class="form-container register-form">
         <h2>Register Account</h2>
@@ -226,7 +218,7 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
             <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
         <?php endif; ?>
 
-         <?php if ($success_message): ?>
+        <?php if ($success_message): ?>
             <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
         <?php endif; ?>
 
@@ -256,7 +248,7 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="Enter your email" required value="<?php echo htmlspecialchars($email); ?>">
             </div>
-             <!-- Password Fields - Don't pre-fill for security -->
+            <!-- Password Fields - Don't pre-fill for security -->
             <div class="input-group">
                 <label for="password">Create Password</label>
                 <input type="password" id="password" name="password" placeholder="Create your password" required minlength="6">
@@ -267,13 +259,13 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
             </div>
 
             <div class="input-group">
-                 <label>Verify CAPTCHA</label>
-                 <div class="captcha-container">
+                <label>Verify CAPTCHA</label>
+                <div class="captcha-container">
                     <canvas id="captchaCanvas" width="150" height="40"></canvas>
                     <button type="button" onclick="generateCaptcha()" class="btn-reload" title="Reload CAPTCHA"><i class="fas fa-sync-alt"></i></button>
-                 </div>
-                 <input type="text" name="captcha_input" id="captchaInput" placeholder="Enter CAPTCHA" required autocomplete="off"> <!-- Value is NOT pre-filled for security -->
-                 <p id="captchaMessage" class="error-message" style="display:none;"></p>
+                </div>
+                <input type="text" name="captcha_input" id="captchaInput" placeholder="Enter CAPTCHA" required autocomplete="off"> <!-- Value is NOT pre-filled for security -->
+                <p id="captchaMessage" class="error-message" style="display:none;"></p>
             </div>
 
             <div style="text-align: center; margin-bottom: 10px; margin-top: 20px;">
@@ -295,13 +287,13 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         <div>
             <h3>User Agreement</h3>
             <p>
-                <h5><b>Privacy Policy</b></h5>
-                This Privacy Policy explains how Rate Tales (“we”) collects, stores, uses, and protects your personal data during your use of this site. All data management activities are carried out in accordance with the provisions of the Law of the Republic of Indonesia Number 27 of 2022 concerning Personal Data Protection (UU PDP). By using this site and registering your account, you provide explicit consent to us to process your personal data as described in this policy.
-                We may collect personal information directly when you register or use features on the site, such as full name, email address, and information related to your activity on the site, including viewing preferences, reviews, ratings, and interaction history. All data we collect is used for legitimate and proportionate purposes, namely to improve your experience using our services. We use it to provide personalized features, provide content recommendations, perform internal analysis, and - with your consent - deliver promotional information or relevant content.
-                Data personal Anda akan disimpan selama akun Anda masih aktif, atau selama diperlukan untuk mendukung tujuan layanan. Kami menerapkan langkah-langkah teknis dan organisasi yang sesuai untuk melindungi data Anda dari akses yang tidak sah, kebocoran, atau penyalahgunaan. Kami tidak akan membagikan data personal Anda kepada pihak ketiga tanpa persetujuan eksplisit dari Anda, kecuali jika diharuskan oleh hukum atau dalam konteks penegakan hukum dan kewajiban hukum lainnya.
-                Sesuai dengan ketentuan UU PDP, Anda sebagai pemilik data memiliki hak untuk mengakses data personal Anda, meminta perbaikan atau penghapusan data, menarik kembali persetujuan atas pemprosesan data, serta mengajukan keberatan atas pemprosesan tertentu. Kami menghormati hak-hak tersebut dan akan menindaklanjuti setiap permintaan yang Anda sampaikan melalui saluran kontak resmi yang tersedia di situs kami.
-                Kami dapat memperbarui isi Kebijakan Privasi ini dari waktu ke waktu, terutama jika terjadi perubahan peraturan atau perkembangan teknologi yang memengaruhi cara kami memproses data personal Anda. Perubahan signifikan akan kami sampaikan melalui notifikasi di situs atau email. Dengan terus menggunakan layanan kami setelah perubahan diberlakukan, Anda dianggap telah menyetujui kebijakan yang diperbarui.
-                Jika Anda memiliki pertanyaan, permintaan, atau keluhan terkait kebijakan ini atau penggunaan data personal Anda, Anda dapat menghubungi kami melalui alamat email atau formulir kontak resmi yang tersedia di situs. Dengan menggunakan situs ini, Anda menyatakan telah membaca, memahami, dan menyetujui isi Kebijakan Privasi ini serta memberikan persetujuan eksplisit atas pengumpulan dan pemprosesan data personal Anda oleh kami.
+            <h5><b>Privacy Policy</b></h5>
+            This Privacy Policy explains how Rate Tales (“we”) collects, stores, uses, and protects your personal data during your use of this site. All data management activities are carried out in accordance with the provisions of the Law of the Republic of Indonesia Number 27 of 2022 concerning Personal Data Protection (UU PDP). By using this site and registering your account, you provide explicit consent to us to process your personal data as described in this policy.
+            We may collect personal information directly when you register or use features on the site, such as full name, email address, and information related to your activity on the site, including viewing preferences, reviews, ratings, and interaction history. All data we collect is used for legitimate and proportionate purposes, namely to improve your experience using our services. We use it to provide personalized features, provide content recommendations, perform internal analysis, and - with your consent - deliver promotional information or relevant content.
+            Data personal Anda akan disimpan selama akun Anda masih aktif, atau selama diperlukan untuk mendukung tujuan layanan. Kami menerapkan langkah-langkah teknis dan organisasi yang sesuai untuk melindungi data Anda dari akses yang tidak sah, kebocoran, atau penyalahgunaan. Kami tidak akan membagikan data personal Anda kepada pihak ketiga tanpa persetujuan eksplisit dari Anda, kecuali jika diharuskan oleh hukum atau dalam konteks penegakan hukum dan kewajiban hukum lainnya.
+            Sesuai dengan ketentuan UU PDP, Anda sebagai pemilik data memiliki hak untuk mengakses data personal Anda, meminta perbaikan atau penghapusan data, menarik kembali persetujuan atas pemprosesan data, serta mengajukan keberatan atas pemprosesan tertentu. Kami menghormati hak-hak tersebut dan akan menindaklanjuti setiap permintaan yang Anda sampaikan melalui saluran kontak resmi yang tersedia di situs kami.
+            Kami dapat memperbarui isi Kebijakan Privasi ini dari waktu ke waktu, terutama jika terjadi perubahan peraturan atau perkembangan teknologi yang memengaruhi cara kami memproses data personal Anda. Perubahan signifikan akan kami sampaikan melalui notifikasi di situs atau email. Dengan terus menggunakan layanan kami setelah perubahan diberlakukan, Anda dianggap telah menyetujui kebijakan yang diperbarui.
+            Jika Anda memiliki pertanyaan, permintaan, atau keluhan terkait kebijakan ini atau penggunaan data personal Anda, Anda dapat menghubungi kami melalui alamat email atau formulir kontak resmi yang tersedia di situs. Dengan menggunakan situs ini, Anda menyatakan telah membaca, memahami, dan menyetujui isi Kebijakan Privasi ini serta memberikan persetujuan eksplisit atas pengumpulan dan pemprosesan data personal Anda oleh kami.
             </p>
             <button id="close-agreement" class="btn">Close</button>
         </div>
@@ -360,9 +352,9 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         async function generateCaptcha() {
             try {
                 const response = await fetch('generate_captcha.php');
-                 if (!response.ok) {
-                     throw new Error('Failed to load new CAPTCHA (status: ' + response.status + ')');
-                 }
+                if (!response.ok) {
+                    throw new Error('Failed to load new CAPTCHA (status: ' + response.status + ')');
+                }
                 const newCaptchaCode = await response.text();
                 currentCaptchaCode = newCaptchaCode;
                 drawCaptcha(currentCaptchaCode);
@@ -380,14 +372,14 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         document.addEventListener('DOMContentLoaded', () => {
             drawCaptcha(currentCaptchaCode);
 
-             // Set initial state of the Register button based on the agreement checkbox
-             const agreeCheckbox = document.getElementById('agree-checkbox');
-             const registerSubmitBtn = document.getElementById('register-submit-btn');
-             if(registerSubmitBtn && agreeCheckbox) {
-                 registerSubmitBtn.disabled = !agreeCheckbox.checked;
-             }
-             // Optional: clear CAPTCHA input on page load for security
-             captchaInput.value = '';
+            // Set initial state of the Register button based on the agreement checkbox
+            const agreeCheckbox = document.getElementById('agree-checkbox');
+            const registerSubmitBtn = document.getElementById('register-submit-btn');
+            if (registerSubmitBtn && agreeCheckbox) {
+                registerSubmitBtn.disabled = !agreeCheckbox.checked;
+            }
+            // Optional: clear CAPTCHA input on page load for security
+            captchaInput.value = '';
         });
 
 
@@ -400,30 +392,30 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
             // Clear previous client-side messages
             const feedbackElement = document.getElementById('captchaMessage'); // Use this element for feedback
             if (feedbackElement) {
-                 feedbackElement.style.display = 'none';
-                 feedbackElement.innerText = '';
-                 feedbackElement.style.color = 'red'; // Reset color
+                feedbackElement.style.display = 'none';
+                feedbackElement.innerText = '';
+                feedbackElement.style.color = 'red'; // Reset color
             }
 
 
             if (password !== confirmPassword) {
-                 if (feedbackElement) {
-                     feedbackElement.innerText = 'Password and Confirm Password do not match!';
-                     feedbackElement.style.display = 'block';
-                 } else {
+                if (feedbackElement) {
+                    feedbackElement.innerText = 'Password and Confirm Password do not match!';
+                    feedbackElement.style.display = 'block';
+                } else {
                     alert('Password and Confirm Password do not match!');
-                 }
+                }
                 return false; // Prevent form submission
             }
 
-             if (!agreeCheckbox.checked) {
-                 if (feedbackElement) {
-                     feedbackElement.innerText = 'You must agree to the User Agreement.';
-                     feedbackElement.style.display = 'block';
-                 } else {
-                     alert('You must agree to the User Agreement.');
-                 }
-                 return false; // Prevent form submission
+            if (!agreeCheckbox.checked) {
+                if (feedbackElement) {
+                    feedbackElement.innerText = 'You must agree to the User Agreement.';
+                    feedbackElement.style.display = 'block';
+                } else {
+                    alert('You must agree to the User Agreement.');
+                }
+                return false; // Prevent form submission
             }
 
             // Client-side CAPTCHA check (optional, server-side is mandatory)
@@ -453,22 +445,22 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
 
 
         function showAgreementModal() {
-            if(agreementModal) {
-                 agreementModal.style.display = 'flex'; // Use flex to center
+            if (agreementModal) {
+                agreementModal.style.display = 'flex'; // Use flex to center
             }
         }
 
-        if(agreementBtn) agreementBtn.addEventListener('click', showAgreementModal);
-        if(showAgreementLink) showAgreementLink.addEventListener('click', (e) => {
+        if (agreementBtn) agreementBtn.addEventListener('click', showAgreementModal);
+        if (showAgreementLink) showAgreementLink.addEventListener('click', (e) => {
             e.preventDefault();
             showAgreementModal();
         });
-        if(closeAgreement) closeAgreement.addEventListener('click', () => {
-            if(agreementModal) agreementModal.style.display = 'none';
+        if (closeAgreement) closeAgreement.addEventListener('click', () => {
+            if (agreementModal) agreementModal.style.display = 'none';
         });
 
         // Close modal if clicking outside content
-        if(agreementModal) {
+        if (agreementModal) {
             agreementModal.addEventListener('click', (e) => {
                 if (e.target === agreementModal) {
                     agreementModal.style.display = 'none';
@@ -477,11 +469,12 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         }
 
         // Enable/disable Register button based on agreement checkbox
-        if(agreeCheckbox && registerSubmitBtn) {
+        if (agreeCheckbox && registerSubmitBtn) {
             agreeCheckbox.addEventListener('change', () => {
                 registerSubmitBtn.disabled = !agreeCheckbox.checked;
             });
         }
     </script>
 </body>
+
 </html>

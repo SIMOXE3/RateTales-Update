@@ -4,17 +4,16 @@
 $host = 'localhost';
 $dbname = 'ratingtales';
 $username = 'root';
-$password = '';
+$password = 'root';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-     // Set encoding for proper character handling
+    // Set encoding for proper character handling
     $pdo->exec("SET NAMES 'utf8mb4'");
     $pdo->exec("SET CHARACTER SET utf8mb4");
-
-} catch(PDOException $e) {
+} catch (PDOException $e) {
     // Log the error instead of dying on a live site
     error_log("Database connection failed: " . $e->getMessage());
     // Provide a user-friendly message
@@ -23,14 +22,16 @@ try {
 
 // User Functions
 // Added full_name, age, gender, bio to createUser
-function createUser($full_name, $username, $email, $password, $age, $gender, $profile_image = null, $bio = null) {
+function createUser($full_name, $username, $email, $password, $age, $gender, $profile_image = null, $bio = null)
+{
     global $pdo;
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT); // Use BCRYPT for better security
     $stmt = $pdo->prepare("INSERT INTO users (full_name, username, email, password, age, gender, profile_image, bio) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
     return $stmt->execute([$full_name, $username, $email, $hashedPassword, $age, $gender, $profile_image, $bio]);
 }
 
-function getUserById($userId) {
+function getUserById($userId)
+{
     global $pdo;
     $stmt = $pdo->prepare("SELECT user_id, full_name, username, email, profile_image, age, gender, bio FROM users WHERE user_id = ?");
     $stmt->execute([$userId]);
@@ -38,14 +39,15 @@ function getUserById($userId) {
 }
 
 // Added updateUser function
-function updateUser($userId, $data) {
+function updateUser($userId, $data)
+{
     global $pdo;
     $updates = [];
     $params = [];
     foreach ($data as $key => $value) {
         // Basic validation for allowed update fields
         if (in_array($key, ['full_name', 'username', 'email', 'profile_image', 'age', 'gender', 'bio'])) {
-             // Use backticks for column names in case they are reserved words (e.g., `user`)
+            // Use backticks for column names in case they are reserved words (e.g., `user`)
             $updates[] = "`{$key}` = ?";
             $params[] = $value;
         }
@@ -65,20 +67,23 @@ function updateUser($userId, $data) {
 
 // Movie Functions
 // Added uploaded_by
-function createMovie($title, $summary, $release_date, $duration_hours, $duration_minutes, $age_rating, $poster_image, $trailer_url, $trailer_file, $uploaded_by) {
+function createMovie($title, $summary, $release_date, $duration_hours, $duration_minutes, $age_rating, $poster_image, $trailer_url, $trailer_file, $uploaded_by)
+{
     global $pdo;
     $stmt = $pdo->prepare("INSERT INTO movies (title, summary, release_date, duration_hours, duration_minutes, age_rating, poster_image, trailer_url, trailer_file, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$title, $summary, $release_date, $duration_hours, $duration_minutes, $age_rating, $poster_image, $trailer_url, $trailer_file, $uploaded_by]);
     return $pdo->lastInsertId(); // Return the ID of the newly created movie
 }
 
-function addMovieGenre($movie_id, $genre) {
+function addMovieGenre($movie_id, $genre)
+{
     global $pdo;
     $stmt = $pdo->prepare("INSERT IGNORE INTO movie_genres (movie_id, genre) VALUES (?, ?)"); // Use INSERT IGNORE to prevent duplicates
     return $stmt->execute([$movie_id, $genre]);
 }
 
-function getMovieById($movieId) {
+function getMovieById($movieId)
+{
     global $pdo;
     // Fetch movie details along with its genres and the uploader's username
     $stmt = $pdo->prepare("
@@ -95,6 +100,7 @@ function getMovieById($movieId) {
     $stmt->execute([$movieId]);
     $movie = $stmt->fetch();
 
+
     // Add average rating to the movie data
     if ($movie) {
         $movie['average_rating'] = getMovieAverageRating($movieId); // Use the helper function
@@ -104,7 +110,8 @@ function getMovieById($movieId) {
 }
 
 
-function getAllMovies() {
+function getAllMovies()
+{
     global $pdo;
     // Fetch all movies along with genres and average rating
     $stmt = $pdo->prepare("
@@ -122,7 +129,8 @@ function getAllMovies() {
 }
 
 // Added function to get movies uploaded by a specific user
-function getUserUploadedMovies($userId) {
+function getUserUploadedMovies($userId)
+{
     global $pdo;
     $stmt = $pdo->prepare("
         SELECT
@@ -142,7 +150,8 @@ function getUserUploadedMovies($userId) {
 
 // Review Functions
 // Supports inserting a new review or updating an existing one (upsert)
-function createReview($movie_id, $user_id, $rating, $comment) {
+function createReview($movie_id, $user_id, $rating, $comment)
+{
     global $pdo;
     // Using ON DUPLICATE KEY UPDATE to handle cases where a user reviews the same movie again
     // This assumes a unique key on (movie_id, user_id) in the reviews table, which is standard practice
@@ -158,16 +167,17 @@ function createReview($movie_id, $user_id, $rating, $comment) {
         VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE rating = VALUES(rating), comment = VALUES(comment), created_at = CURRENT_TIMESTAMP -- Update timestamp on update
     ");
-     return $stmt->execute([$movie_id, $user_id, $rating, $comment]);
+    return $stmt->execute([$movie_id, $user_id, $rating, $comment]);
 
-     /*
+    /*
      // Option 2: If reviews table does NOT have UNIQUE KEY (movie_id, user_id) - less ideal for tracking single review per user
      $stmt = $pdo->prepare("INSERT INTO reviews (movie_id, user_id, rating, comment) VALUES (?, ?, ?, ?)");
      return $stmt->execute([$movie_id, $user_id, $rating, $comment]);
      */
 }
 
-function getMovieReviews($movieId) {
+function getMovieReviews($movieId)
+{
     global $pdo;
     // Fetch reviews along with reviewer's username and profile image
     $stmt = $pdo->prepare("
@@ -185,20 +195,23 @@ function getMovieReviews($movieId) {
 }
 
 // Favorite Functions
-function addToFavorites($movie_id, $user_id) {
+function addToFavorites($movie_id, $user_id)
+{
     global $pdo;
     // Use INSERT IGNORE to prevent errors if the favorite already exists (due to UNIQUE KEY)
     $stmt = $pdo->prepare("INSERT IGNORE INTO favorites (movie_id, user_id) VALUES (?, ?)");
     return $stmt->execute([$movie_id, $user_id]);
 }
 
-function removeFromFavorites($movie_id, $user_id) {
+function removeFromFavorites($movie_id, $user_id)
+{
     global $pdo;
     $stmt = $pdo->prepare("DELETE FROM favorites WHERE movie_id = ? AND user_id = ?");
     return $stmt->execute([$movie_id, $user_id]);
 }
 
-function getUserFavorites($userId) {
+function getUserFavorites($userId)
+{
     global $pdo;
     // Fetch user favorites along with genres and average rating
     $stmt = $pdo->prepare("
@@ -218,7 +231,8 @@ function getUserFavorites($userId) {
 }
 
 // Helper function to calculate average rating for a movie
-function getMovieAverageRating($movieId) {
+function getMovieAverageRating($movieId)
+{
     global $pdo;
     $stmt = $pdo->prepare("SELECT AVG(rating) as average_rating FROM reviews WHERE movie_id = ?");
     $stmt->execute([$movieId]);
@@ -228,7 +242,8 @@ function getMovieAverageRating($movieId) {
 }
 
 // Helper function to check if a movie is favorited by the current user
-function isMovieFavorited($movieId, $userId) {
+function isMovieFavorited($movieId, $userId)
+{
     global $pdo;
     if (!$userId) return false; // Cannot favorite if not logged in
     $stmt = $pdo->prepare("SELECT COUNT(*) FROM favorites WHERE movie_id = ? AND user_id = ?");
@@ -251,4 +266,40 @@ if (!is_dir(UPLOAD_DIR_TRAILERS)) {
     mkdir(UPLOAD_DIR_TRAILERS, 0775, true); // Use 0775 permissions
 }
 
-?>
+function updateMovie($movie_id, $title, $summary, $release_date, $duration_hours, $duration_minutes, $age_rating, $poster_image, $trailer_url, $trailer_file)
+{
+    global $pdo;
+    $stmt = $pdo->prepare("
+        UPDATE movies
+        SET
+            title = ?,
+            summary = ?,
+            release_date = ?,
+            duration_hours = ?,
+            duration_minutes = ?,
+            age_rating = ?,
+            poster_image = ?,
+            trailer_url = ?,
+            trailer_file = ?
+        WHERE movie_id = ?
+    ");
+    return $stmt->execute([
+        $title,
+        $summary,
+        $release_date,
+        $duration_hours,
+        $duration_minutes,
+        $age_rating,
+        $poster_image,
+        $trailer_url,
+        $trailer_file,
+        $movie_id
+    ]);
+}
+
+function deleteAllMovieGenres($movie_id)
+{
+    global $pdo;
+    $stmt = $pdo->prepare("DELETE FROM movie_genres WHERE movie_id = ?");
+    return $stmt->execute([$movie_id]);
+}

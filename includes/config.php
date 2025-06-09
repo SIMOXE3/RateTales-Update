@@ -23,7 +23,8 @@ error_reporting(E_ALL);
 
 
 // Helper function to generate random string for CAPTCHA
-function generateRandomString($length = 6) {
+function generateRandomString($length = 6)
+{
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
     $randomString = '';
@@ -34,23 +35,26 @@ function generateRandomString($length = 6) {
 }
 
 // Function to check if a user is authenticated
-function isAuthenticated() {
+function isAuthenticated()
+{
     return isset($_SESSION['user_id']) && $_SESSION['user_id'] > 0;
 }
 
 // Function to redirect to login if not authenticated
-function redirectIfNotAuthenticated() {
+function redirectIfNotAuthenticated()
+{
     if (!isAuthenticated()) {
         // Store the intended URL before redirecting
         $_SESSION['intended_url'] = $_SERVER['REQUEST_URI'];
-        header('Location: ../autentikasi/form-login.php');
+        header('Location: ../autentifikasi/form-login.php');
         exit;
     }
 }
 
 // Function to fetch authenticated user details
 // Calls getUserById from database.php
-function getAuthenticatedUser() {
+function getAuthenticatedUser()
+{
     if (isAuthenticated()) {
         $userId = $_SESSION['user_id'];
         // Fetch user details from the database
@@ -61,7 +65,7 @@ function getAuthenticatedUser() {
         } else {
             // User not found in DB (maybe deleted?), clear session and redirect
             session_destroy();
-            header('Location: ../autentikasi/form-login.php'); // Redirect to login
+            header('Location: ../autentifikasi/form-login.php'); // Redirect to login
             exit;
         }
     }
@@ -70,5 +74,3 @@ function getAuthenticatedUser() {
 
 // Moved getMovieAverageRating and isMovieFavorited to database.php
 // They are now accessed via database.php functions or directly if global $pdo is available and functions are defined globally
-
-?>

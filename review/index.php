@@ -11,6 +11,7 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +19,7 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <nav class="sidebar">
@@ -29,11 +31,11 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
                 <li><a href="../favorite/index.php"><i class="fas fa-heart"></i> <span>Favourites</span></a></li>
                 <li class="active"><a href="#"><i class="fas fa-star"></i> <span>Review</span></a></li>
                 <li><a href="../manage/indeks.php"><i class="fas fa-film"></i> <span>Manage</span></a></li>
-                 <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
             </ul>
             <div class="bottom-links">
                 <ul>
-                    <li><a href="../autentikasi/logout.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                    <li><a href="../autentifikasi/logout.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
                 </ul>
             </div>
         </nav>
@@ -52,8 +54,8 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
                             <div class="movie-poster">
                                 <img src="<?php echo htmlspecialchars(WEB_UPLOAD_DIR_POSTERS . $movie['poster_image'] ?? '../gambar/placeholder.jpg'); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
                                 <div class="movie-actions">
-                                     <!-- Favorite Button (will be handled on details page) -->
-                                     <!-- <button class="action-btn"><i class="fas fa-heart"></i></button> -->
+                                    <!-- Favorite Button (will be handled on details page) -->
+                                    <!-- <button class="action-btn"><i class="fas fa-heart"></i></button> -->
                                 </div>
                             </div>
                             <div class="movie-details">
@@ -61,7 +63,7 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
                                 <p class="movie-info"><?php echo htmlspecialchars((new DateTime($movie['release_date']))->format('Y')); ?> | <?php echo htmlspecialchars($movie['genres'] ?? 'N/A'); ?></p>
                                 <div class="rating">
                                     <div class="stars">
-                                         <?php
+                                        <?php
                                         // Display average rating stars
                                         $average_rating = floatval($movie['average_rating']);
                                         for ($i = 1; $i <= 5; $i++) {
@@ -75,17 +77,17 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
                                         }
                                         ?>
                                     </div>
-                                     <span class="rating-count">(<?php echo htmlspecialchars($movie['average_rating']); ?>)</span>
+                                    <span class="rating-count">(<?php echo htmlspecialchars($movie['average_rating']); ?>)</span>
                                 </div>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                     <div class="empty-state full-width">
-                         <i class="fas fa-film"></i>
-                         <p>No movies available to review yet.</p>
-                         <p class="subtitle">Check back later or <a href="../manage/upload.php">Upload a movie</a> if you are an admin.</p>
-                     </div>
+                    <div class="empty-state full-width">
+                        <i class="fas fa-film"></i>
+                        <p>No movies available to review yet.</p>
+                        <p class="subtitle">Check back later or <a href="../manage/upload.php">Upload a movie</a> if you are an admin.</p>
+                    </div>
                 <?php endif; ?>
             </div>
         </main>
@@ -96,7 +98,7 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
             const searchInput = document.getElementById('searchInput');
             const movieCards = document.querySelectorAll('.review-grid .movie-card');
             const reviewGrid = document.querySelector('.review-grid');
-             const initialEmptyState = document.querySelector('.empty-state.full-width');
+            const initialEmptyState = document.querySelector('.empty-state.full-width');
 
 
             searchInput.addEventListener('input', function() {
@@ -109,19 +111,19 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
 
                     if (title.includes(searchTerm) || info.includes(searchTerm)) {
                         card.style.display = '';
-                         visibleCardCount++;
+                        visibleCardCount++;
                     } else {
                         card.style.display = 'none';
                     }
                 });
 
-                 // Handle empty state visibility
+                // Handle empty state visibility
                 const searchEmptyState = document.querySelector('.search-empty-state');
 
                 if (visibleCardCount === 0 && searchTerm !== '') {
                     if (!searchEmptyState) {
-                         // Hide the initial empty state if it exists and we are searching
-                        if(initialEmptyState) initialEmptyState.style.display = 'none';
+                        // Hide the initial empty state if it exists and we are searching
+                        if (initialEmptyState) initialEmptyState.style.display = 'none';
 
                         const emptyState = document.createElement('div');
                         emptyState.className = 'empty-state search-empty-state full-width';
@@ -132,41 +134,42 @@ $movies = getAllMovies(); // This function now fetches average_rating and genres
                         `;
                         reviewGrid.appendChild(emptyState);
                     } else {
-                         // Update text if search empty state already exists
-                         searchEmptyState.querySelector('p:first-of-type').innerText = `No movies found matching "${htmlspecialchars(searchTerm)}"`;
-                         searchEmptyState.style.display = 'flex';
+                        // Update text if search empty state already exists
+                        searchEmptyState.querySelector('p:first-of-type').innerText = `No movies found matching "${htmlspecialchars(searchTerm)}"`;
+                        searchEmptyState.style.display = 'flex';
                     }
                 } else {
                     // Remove search empty state if cards are visible or search is cleared
                     if (searchEmptyState) {
                         searchEmptyState.remove();
                     }
-                     // Show initial empty state if no movies were loaded AND search is cleared
+                    // Show initial empty state if no movies were loaded AND search is cleared
                     if (movieCards.length === 0 && searchTerm === '' && initialEmptyState) {
-                         initialEmptyState.style.display = 'flex';
+                        initialEmptyState.style.display = 'flex';
                     }
                 }
             });
 
             // Trigger search when search button is clicked
             const searchButton = document.querySelector('.search-bar button');
-            if(searchButton) {
-                 searchButton.addEventListener('click', function() {
-                     const event = new Event('input');
-                     searchInput.dispatchEvent(event);
-                 });
+            if (searchButton) {
+                searchButton.addEventListener('click', function() {
+                    const event = new Event('input');
+                    searchInput.dispatchEvent(event);
+                });
             }
         });
 
-         // Helper function for HTML escaping (client-side)
-         function htmlspecialchars(str) {
-             if (typeof str !== 'string') return str;
-             return str.replace(/&/g, '&amp;')
-                       .replace(/</g, '&lt;')
-                       .replace(/>/g, '&gt;')
-                       .replace(/"/g, '&quot;')
-                       .replace(/'/g, '&#039;');
-         }
+        // Helper function for HTML escaping (client-side)
+        function htmlspecialchars(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
     </script>
 </body>
+
 </html>

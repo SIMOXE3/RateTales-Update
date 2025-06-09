@@ -30,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_movie_id'])) {
 
             // Check if a row was actually deleted
             if ($stmt->rowCount() > 0) {
-                 // Optional: Delete associated files (poster, trailer) from the server
-                 // This is more complex as you need the file paths BEFORE deleting the DB record.
-                 // To do this safely, you would fetch the movie first, get the paths, then start transaction,
-                 // delete DB record, commit, then delete files.
-                 // For simplicity here, file deletion is omitted, but consider adding it.
-                 // Example (requires fetching movie before deletion):
-                 /*
+                // Optional: Delete associated files (poster, trailer) from the server
+                // This is more complex as you need the file paths BEFORE deleting the DB record.
+                // To do this safely, you would fetch the movie first, get the paths, then start transaction,
+                // delete DB record, commit, then delete files.
+                // For simplicity here, file deletion is omitted, but consider adding it.
+                // Example (requires fetching movie before deletion):
+                /*
                  $old_movie = getMovieById($movieIdToDelete); // Fetch BEFORE delete
                  if ($old_movie) {
                       if (!empty($old_movie['poster_image']) && file_exists(UPLOAD_DIR_POSTERS . $old_movie['poster_image'])) {
@@ -51,11 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_movie_id'])) {
                 $pdo->commit();
                 $_SESSION['success_message'] = 'Movie deleted successfully.';
             } else {
-                 // Movie not found OR not uploaded by the current user
+                // Movie not found OR not uploaded by the current user
                 $pdo->rollBack();
                 $_SESSION['error_message'] = 'Movie not found or you do not have permission to delete it.';
             }
-
         } catch (PDOException $e) {
             $pdo->rollBack();
             error_log("Database error during movie deletion: " . $e->getMessage());
@@ -80,14 +79,16 @@ unset($_SESSION['error_message']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Movies - RatingTales</title>
     <link rel="stylesheet" href="styles.css">
-     <link rel="stylesheet" href="../review/styles.css"> <!-- Include review styles for movie card look -->
+    <link rel="stylesheet" href="../review/styles.css"> <!-- Include review styles for movie card look -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -100,24 +101,24 @@ unset($_SESSION['error_message']);
                 <li><a href="../favorite/index.php"><i class="fas fa-heart"></i> <span>Favourites</span></a></li>
                 <li><a href="../review/index.php"><i class="fas fa-star"></i> <span>Review</span></a></li>
                 <li class="active"><a href="indeks.php"><i class="fas fa-film"></i> <span>Manage</span></a></li>
-                 <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
+                <li><a href="../acc_page/index.php"><i class="fas fa-user"></i> <span>Profile</span></a></li>
             </ul>
             <ul class="bottom-links">
-                <li><a href="../autentikasi/logout.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                <li><a href="../autentifikasi/logout.php"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
             </ul>
         </div>
 
         <!-- Main Content -->
         <main class="main-content">
             <div class="header">
-                 <h1>Manage Movies</h1>
+                <h1>Manage Movies</h1>
                 <div class="search-bar">
                     <i class="fas fa-search"></i>
                     <input type="text" id="searchInput" placeholder="Search movies...">
                 </div>
             </div>
 
-             <?php if ($success_message): ?>
+            <?php if ($success_message): ?>
                 <div class="alert success"><?php echo htmlspecialchars($success_message); ?></div>
             <?php endif; ?>
             <?php if ($error_message): ?>
@@ -134,20 +135,20 @@ unset($_SESSION['error_message']);
                         <p class="subtitle">Start adding your movies by clicking the upload button below</p>
                     </div>
                 <?php else: ?>
-                     <?php foreach ($movies as $movie): ?>
+                    <?php foreach ($movies as $movie): ?>
                         <div class="movie-card">
                             <div class="movie-poster">
                                 <img src="<?php echo htmlspecialchars(WEB_UPLOAD_DIR_POSTERS . $movie['poster_image'] ?? '../gambar/placeholder.jpg'); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>">
                                 <div class="movie-actions">
-                                     <!-- Edit Button -->
-                                     <a href="edit.php?id=<?php echo $movie['movie_id']; ?>" class="action-btn" title="Edit Movie">
-                                         <i class="fas fa-pen"></i>
-                                     </a>
-                                     <!-- Delete Button -->
-                                     <form action="indeks.php" method="POST" onsubmit="return confirm('Are you sure you want to delete the movie &quot;<?php echo htmlspecialchars($movie['title']); ?>&quot;? This action cannot be undone.');">
-                                         <input type="hidden" name="delete_movie_id" value="<?php echo $movie['movie_id']; ?>">
-                                         <button type="submit" class="action-btn" title="Delete Movie"><i class="fas fa-trash"></i></button>
-                                     </form>
+                                    <!-- Edit Button -->
+                                    <a href="edit.php?id=<?php echo $movie['movie_id']; ?>" class="action-btn" title="Edit Movie">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <!-- Delete Button -->
+                                    <form action="indeks.php" method="POST" onsubmit="return confirm('Are you sure you want to delete the movie &quot;<?php echo htmlspecialchars($movie['title']); ?>&quot;? This action cannot be undone.');">
+                                        <input type="hidden" name="delete_movie_id" value="<?php echo $movie['movie_id']; ?>">
+                                        <button type="submit" class="action-btn" title="Delete Movie"><i class="fas fa-trash"></i></button>
+                                    </form>
                                 </div>
                             </div>
                             <div class="movie-details">
@@ -155,9 +156,8 @@ unset($_SESSION['error_message']);
                                 <p class="movie-info"><?php echo htmlspecialchars((new DateTime($movie['release_date']))->format('Y')); ?> | <?php echo htmlspecialchars($movie['genres'] ?? 'N/A'); ?></p>
                                 <div class="rating">
                                     <div class="stars">
-                                         <?php
-                                        // Display average rating stars
-                                        $average_rating = floatval($movie['average_rating']);
+                                        <?php
+                                        $average_rating = (float)($movie['average_rating'] ?? 0);
                                         for ($i = 1; $i <= 5; $i++) {
                                             if ($i <= $average_rating) {
                                                 echo '<i class="fas fa-star"></i>';
@@ -169,7 +169,7 @@ unset($_SESSION['error_message']);
                                         }
                                         ?>
                                     </div>
-                                    <span class="rating-count">(<?php echo htmlspecialchars($movie['average_rating']); ?>)</span>
+                                    <span class="rating-count">(<?php echo htmlspecialchars($average_rating); ?>)</span>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +179,7 @@ unset($_SESSION['error_message']);
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                 <!-- Edit All button - currently not functional for multi-edit -->
+                <!-- Edit All button - currently not functional for multi-edit -->
                 <!-- <button class="edit-all-btn" title="Edit All Movies">
                     <i class="fas fa-edit"></i>
                 </button> -->
@@ -207,7 +207,7 @@ unset($_SESSION['error_message']);
 
                     if (title.includes(searchTerm) || info.includes(searchTerm)) {
                         card.style.display = '';
-                         visibleCardCount++;
+                        visibleCardCount++;
                     } else {
                         card.style.display = 'none';
                     }
@@ -218,8 +218,8 @@ unset($_SESSION['error_message']);
 
                 if (visibleCardCount === 0 && searchTerm !== '') {
                     if (!searchEmptyState) {
-                         // Hide the initial empty state if it exists and we are searching
-                        if(initialEmptyState) initialEmptyState.style.display = 'none';
+                        // Hide the initial empty state if it exists and we are searching
+                        if (initialEmptyState) initialEmptyState.style.display = 'none';
 
                         const emptyState = document.createElement('div');
                         emptyState.className = 'empty-state search-empty-state full-width';
@@ -230,22 +230,22 @@ unset($_SESSION['error_message']);
                         `;
                         moviesGrid.appendChild(emptyState);
                     } else {
-                         // Update text if search empty state already exists
-                         searchEmptyState.querySelector('p:first-of-type').innerText = `No uploaded movies found matching "${htmlspecialchars(searchTerm)}"`;
-                         searchEmptyState.style.display = 'flex';
+                        // Update text if search empty state already exists
+                        searchEmptyState.querySelector('p:first-of-type').innerText = `No uploaded movies found matching "${htmlspecialchars(searchTerm)}"`;
+                        searchEmptyState.style.display = 'flex';
                     }
                 } else {
                     // Remove search empty state if cards are visible or search is cleared
                     if (searchEmptyState) {
                         searchEmptyState.remove();
                     }
-                     // Show initial empty state if no movies were loaded AND search is cleared
+                    // Show initial empty state if no movies were loaded AND search is cleared
                     if (movieCards.length === 0 && searchTerm === '' && initialEmptyState) {
-                         initialEmptyState.style.display = 'flex';
+                        initialEmptyState.style.display = 'flex';
                     }
                 }
             });
-             // Trigger search when search button is clicked (if you add one)
+            // Trigger search when search button is clicked (if you add one)
             // const searchButton = document.querySelector('.search-bar button');
             // if(searchButton) {
             //     searchButton.addEventListener('click', function() {
@@ -255,15 +255,16 @@ unset($_SESSION['error_message']);
             // }
         });
 
-         // Helper function for HTML escaping (client-side)
-         function htmlspecialchars(str) {
-             if (typeof str !== 'string') return str;
-             return str.replace(/&/g, '&amp;')
-                       .replace(/</g, '&lt;')
-                       .replace(/>/g, '&gt;') // Keep > as is for HTML structure, but usually encode
-                       .replace(/"/g, '&quot;')
-                       .replace(/'/g, '&#039;');
-         }
+        // Helper function for HTML escaping (client-side)
+        function htmlspecialchars(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;') // Keep > as is for HTML structure, but usually encode
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
     </script>
 </body>
+
 </html>

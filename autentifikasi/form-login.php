@@ -11,7 +11,7 @@ if (isAuthenticated()) {
 // --- Logika generate CAPTCHA (Server-side) ---
 // Generate CAPTCHA new if not set or needed after POST error
 if (!isset($_SESSION['captcha_code']) || ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['error']))) {
-     $_SESSION['captcha_code'] = generateRandomString(6);
+    $_SESSION['captcha_code'] = generateRandomString(6);
 }
 
 
@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password_input = $_POST['password'] ?? '';
     $captcha_input_post = trim($_POST['captcha_input'] ?? '');
 
-     // Store inputs in session in case of redirect (for UX)
-     $_SESSION['login_username_input'] = $username_input_post;
-     $_SESSION['login_captcha_input'] = $captcha_input_post; // Note: This will be cleared on page load, but useful for debugging
+    // Store inputs in session in case of redirect (for UX)
+    $_SESSION['login_username_input'] = $username_input_post;
+    $_SESSION['login_captcha_input'] = $captcha_input_post; // Note: This will be cleared on page load, but useful for debugging
 
     // --- Validasi Server-side (Basic) ---
     if (empty($username_input_post) || empty($password_input) || empty($captcha_input_post)) {
@@ -60,9 +60,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- Lanjutkan proses login ---
     try {
         // Cek pengguna berdasarkan username atau email
-        $stmt = $pdo->prepare("SELECT user_id, password FROM users WHERE username = ? OR email = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT user_id, password FROM users WHERE username=? OR email=?");
         $stmt->execute([$username_input_post, $username_input_post]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
 
         // Verifikasi password
         if ($user && password_verify($password_input, $user['password'])) {
@@ -81,24 +82,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             header('Location: ' . $redirect_url);
             exit;
-
         } else {
             // Username/Email or password incorrect
             $_SESSION['error'] = 'Incorrect Username/Email or password.';
-             // Ensure CAPTCHA is regenerated for the next attempt
+            // Ensure CAPTCHA is regenerated for the next attempt
             if (!isset($_SESSION['captcha_code'])) {
-                 $_SESSION['captcha_code'] = generateRandomString(6);
+                $_SESSION['captcha_code'] = generateRandomString(6);
             }
             header('Location: form-login.php');
             exit;
         }
-
     } catch (PDOException $e) {
         error_log("Database error during login: " . $e->getMessage());
         $_SESSION['error'] = 'An internal error occurred. Please try again.';
-         if (!isset($_SESSION['captcha_code'])) {
-             $_SESSION['captcha_code'] = generateRandomString(6);
-         }
+        if (!isset($_SESSION['captcha_code'])) {
+            $_SESSION['captcha_code'] = generateRandomString(6);
+        }
         header('Location: form-login.php');
         exit;
     }
@@ -119,6 +118,7 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -130,6 +130,7 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
     <!-- Google Sign-In - Keep for now, although not implemented -->
     <!-- <script src="https://accounts.google.com/gsi/client" async defer></script> -->
 </head>
+
 <body>
     <div class="form-container login-form">
         <h2>Login</h2>
@@ -138,7 +139,7 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
             <p class="error-message"><?php echo htmlspecialchars($error_message); ?></p>
         <?php endif; ?>
 
-         <?php if ($success_message): ?>
+        <?php if ($success_message): ?>
             <p class="success-message"><?php echo htmlspecialchars($success_message); ?></p>
         <?php endif; ?>
 
@@ -157,14 +158,14 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
                 <label for="rememberMe">Remember Me</label>
             </div>
 
-             <div class="input-group">
-                 <label>Verify CAPTCHA</label>
-                 <div class="captcha-container">
+            <div class="input-group">
+                <label>Verify CAPTCHA</label>
+                <div class="captcha-container">
                     <canvas id="captchaCanvas" width="150" height="40"></canvas>
                     <button type="button" onclick="generateCaptcha()" class="btn-reload" title="Reload CAPTCHA"><i class="fas fa-sync-alt"></i></button>
-                 </div>
-                 <input type="text" name="captcha_input" id="captchaInput" placeholder="Enter CAPTCHA" required autocomplete="off"> <!-- Value is NOT prefilled for security -->
-                 <p id="captchaMessage" class="error-message" style="display:none;"></p>
+                </div>
+                <input type="text" name="captcha_input" id="captchaInput" placeholder="Enter CAPTCHA" required autocomplete="off"> <!-- Value is NOT prefilled for security -->
+                <p id="captchaMessage" class="error-message" style="display:none;"></p>
             </div>
 
             <button type="submit" class="btn">Login</button>
@@ -203,10 +204,10 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
 
             // Draw random lines
             for (let i = 0; i < 5; i++) {
-                 ctx.beginPath();
-                 ctx.moveTo(Math.random() * captchaCanvas.width, Math.random() * captchaCanvas.height);
-                 ctx.lineTo(Math.random() * captchaCanvas.width, Math.random() * captchaCanvas.height);
-                 ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * captchaCanvas.width, Math.random() * captchaCanvas.height);
+                ctx.lineTo(Math.random() * captchaCanvas.width, Math.random() * captchaCanvas.height);
+                ctx.stroke();
             }
 
             // Draw CAPTCHA text with slight variations
@@ -234,8 +235,8 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
             try {
                 const response = await fetch('generate_captcha.php');
                 if (!response.ok) {
-                     throw new Error('Failed to load new CAPTCHA (status: ' + response.status + ')');
-                 }
+                    throw new Error('Failed to load new CAPTCHA (status: ' + response.status + ')');
+                }
                 const newCaptchaCode = await response.text();
                 currentCaptchaCode = newCaptchaCode; // Update global variable
                 drawCaptcha(currentCaptchaCode); // Redraw canvas
@@ -252,8 +253,8 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         // Initial drawing
         document.addEventListener('DOMContentLoaded', () => {
             drawCaptcha(currentCaptchaCode);
-             // Optional: clear CAPTCHA input on page load for security
-             captchaInput.value = '';
+            // Optional: clear CAPTCHA input on page load for security
+            captchaInput.value = '';
         });
 
         // Google Sign-In handler (placeholder - uncomment and implement if needed)
@@ -264,4 +265,5 @@ $captchaCodeForClient = $_SESSION['captcha_code'] ?? '';
         // }
     </script>
 </body>
+
 </html>
