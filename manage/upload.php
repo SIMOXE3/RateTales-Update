@@ -179,7 +179,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $pdo->commit();
 
             $_SESSION['success_message'] = 'Movie uploaded successfully!';
-            header('Location: indeks.php'); // Redirect to manage page
+            header('Location: indeks.php');
+            // Reset form data
+            unset($_SESSION['upload_form_data']);
+            echo '<script>
+                document.getElementById("upload-form").reset();
+                window.location.href = "indeks.php";
+            </script>';
             exit;
         } catch (PDOException $e) {
             $pdo->rollBack();

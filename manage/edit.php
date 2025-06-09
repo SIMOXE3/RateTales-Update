@@ -134,7 +134,7 @@ $error_message = isset($_SESSION['error_message']) ? $_SESSION['error_message'] 
 unset($_SESSION['error_message']);
 
 // Prepare genres for checkbox display
-$allGenres = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'Thriller', 'War', 'Western'];
+$allGenres = ['Action', 'Adventure', 'Comedy', 'Drama', 'Horror', 'Supernatural', 'Animation', 'Sci-fi'];
 $movieGenresArray = explode(', ', $movie['genres'] ?? ''); // Convert comma-separated string to array
 ?>
 
@@ -148,52 +148,8 @@ $movieGenresArray = explode(', ', $movie['genres'] ?? ''); // Convert comma-sepa
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="../review/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="upload.css">
     <style>
-        /* Specific styles for edit/upload form */
-        .form-container {
-            background-color: var(--card-bg-color);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            color: var(--text-color);
-        }
-
-        .form-container h2 {
-            text-align: center;
-            margin-bottom: 25px;
-            color: var(--primary-color);
-            font-size: 2em;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: var(--text-color);
-        }
-
-        .form-group input[type="text"],
-        .form-group input[type="number"],
-        .form-group input[type="date"],
-        .form-group input[type="url"],
-        .form-group textarea,
-        .form-group select {
-            width: calc(100% - 20px);
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            background-color: var(--input-bg-color);
-            color: var(--text-color);
-            font-size: 1em;
-            transition: border-color 0.3s ease;
-        }
 
         .form-group input[type="text"]:focus,
         .form-group input[type="number"]:focus,
@@ -370,91 +326,102 @@ $movieGenresArray = explode(', ', $movie['genres'] ?? ''); // Convert comma-sepa
                 <div class="alert error"><?php echo htmlspecialchars($error_message); ?></div>
             <?php endif; ?>
 
-            <div class="form-container">
-                <form action="edit.php?id=<?php echo htmlspecialchars($movieId); ?>" method="POST" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <label for="title">Movie Title</label>
-                        <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($movie['title'] ?? ''); ?>" required>
-                    </div>
+            <div class="upload-container">
+                <form class="upload-form" action="edit.php?id=<?php echo htmlspecialchars($movieId); ?>" method="POST" enctype="multipart/form-data">
+                    <div class="form-layout">
+                    <div class="form-main">
+                        <div class="form-group">
+                            <label for="title">Movie Title</label>
+                            <input type="text" id="title" name="title" value="<?php echo htmlspecialchars($movie['title'] ?? ''); ?>" required>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="summary">Summary</label>
-                        <textarea id="summary" name="summary" required><?php echo htmlspecialchars($movie['summary'] ?? ''); ?></textarea>
-                    </div>
+                        <div class="form-group">
+                            <label for="summary">Movie Summary</label>
+                            <textarea id="summary" name="summary" required><?php echo htmlspecialchars($movie['summary'] ?? ''); ?></textarea>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="release_date">Release Date</label>
-                        <input type="date" id="release_date" name="release_date" value="<?php echo htmlspecialchars($movie['release_date'] ?? ''); ?>" required>
-                    </div>
+                        <div class="form-group">
+                            <label>Duration</label>
+                            <div class="duration-inputs">
+                                <div class="duration-field">
+                                    <input type="number" id="duration_hours" name="duration_hours" value="<?php echo htmlspecialchars($movie['duration_hours'] ?? ''); ?>" min="0" max="10" required>
+                                    <span>Hours</span>
+                                </div>
+                                <div class="duration-field">
+                                    <input type="number" id="duration_minutes" name="duration_minutes" value="<?php echo htmlspecialchars($movie['duration_minutes'] ?? ''); ?>" min="0" max="59" required>
+                                    <span>Minutes</span>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Duration</label>
-                        <div class="duration-group">
-                            <input type="number" id="duration_hours" name="duration_hours" placeholder="Hours" min="0" value="<?php echo htmlspecialchars($movie['duration_hours'] ?? ''); ?>" required>
-                            <input type="number" id="duration_minutes" name="duration_minutes" placeholder="Minutes" min="0" max="59" value="<?php echo htmlspecialchars($movie['duration_minutes'] ?? ''); ?>" required>
+                        <div class="form-group">
+                            <label for="age_rating">Age Rating</label>
+                            <select id="age_rating" name="age_rating" required>
+                                <option value="">Select Age Rating</option>
+                                <option value="G" <?php echo ($movie['age_rating'] == 'G') ? 'selected' : ''; ?>>G - General Audiences</option>
+                                <option value="PG" <?php echo ($movie['age_rating'] == 'PG') ? 'selected' : ''; ?>>PG - Parental Guidance Suggested</option>
+                                <option value="PG-13" <?php echo ($movie['age_rating'] == 'PG-13') ? 'selected' : ''; ?>>PG-13 - Parents Strongly Cautioned</option>
+                                <option value="R" <?php echo ($movie['age_rating'] == 'R') ? 'selected' : ''; ?>>R - Restricted</option>
+                                <option value="NC-17" <?php echo ($movie['age_rating'] == 'NC-17') ? 'selected' : ''; ?>>NC-17 - Adults Only</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Genres</label>
+                            <div class="genre-options">
+                                <?php foreach ($allGenres as $genre): ?>
+                                    <label class="genre-checkbox">
+                                        <input type="checkbox" name="genres[]" value="<?php echo htmlspecialchars($genre); ?>" 
+                                               <?php echo in_array($genre, $movieGenresArray) ? 'checked' : ''; ?>>
+                                        <?php echo htmlspecialchars($genre); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="trailer_url">Trailer URL (YouTube)</label>
+                            <input type="url" id="trailer_url" name="trailer_url" value="<?php echo htmlspecialchars($movie['trailer_url'] ?? ''); ?>">
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="age_rating">Age Rating</label>
-                        <select id="age_rating" name="age_rating" required>
-                            <option value="">Select Age Rating</option>
-                            <option value="G" <?php echo ($movie['age_rating'] == 'G') ? 'selected' : ''; ?>>G - General Audiences</option>
-                            <option value="PG" <?php echo ($movie['age_rating'] == 'PG') ? 'selected' : ''; ?>>PG - Parental Guidance Suggested</option>
-                            <option value="PG-13" <?php echo ($movie['age_rating'] == 'PG-13') ? 'selected' : ''; ?>>PG-13 - Parents Strongly Cautioned</option>
-                            <option value="R" <?php echo ($movie['age_rating'] == 'R') ? 'selected' : ''; ?>>R - Restricted</option>
-                            <option value="NC-17" <?php echo ($movie['age_rating'] == 'NC-17') ? 'selected' : ''; ?>>NC-17 - Adults Only</option>
-                        </select>
-                    </div>
-
-                    <div class="file-upload-group">
-                        <label for="poster_image">Poster Image</label>
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="poster_image" name="poster_image" accept="image/*">
-                            <?php if (!empty($movie['poster_image'])) : ?>
-                                <span class="current-file-display">Current: <?php echo htmlspecialchars($movie['poster_image']); ?></span>
-                            <?php endif; ?>
+                    <div class="form-side">
+                        <div class="form-group poster-upload">
+                            <label for="poster_image">Movie Poster</label>
+                            <div class="upload-area">
+                                <input type="file" id="poster_image" name="poster_image" accept="image/*">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click or drag image to upload</p>
+                                <?php if (!empty($movie['poster_image'])): ?>
+                                    <img id="poster-preview" src="<?php echo htmlspecialchars(WEB_UPLOAD_DIR_POSTERS . $movie['poster_image']); ?>" alt="Current poster" style="display: block;">
+                                <?php endif; ?>
+                            </div>
                         </div>
-                        <?php if (!empty($movie['poster_image'])) : ?>
-                            <small style="color: var(--text-color-light); display: block; margin-top: 5px;">Leave blank to keep current poster.</small>
-                        <?php endif; ?>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="trailer_url">Trailer URL (YouTube, Vimeo, etc.)</label>
-                        <input type="url" id="trailer_url" name="trailer_url" value="<?php echo htmlspecialchars($movie['trailer_url'] ?? ''); ?>" placeholder="e.g., https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-                        <small style="color: var(--text-color-light);">If you upload a file, the URL will be ignored.</small>
-                    </div>
+                        <div class="form-section">
+                            <h2>Advanced Settings</h2>
+                            <div class="advanced-settings">
+                                <div class="form-group">
+                                    <label for="release_date">Release Date</label>
+                                    <input type="date" id="release_date" name="release_date" value="<?php echo htmlspecialchars($movie['release_date'] ?? ''); ?>" required>
+                                </div>
 
-                    <div class="file-upload-group">
-                        <label for="trailer_file">Trailer File (MP4, AVI, MOV, WEBM)</label>
-                        <div class="file-upload-wrapper">
-                            <input type="file" id="trailer_file" name="trailer_file" accept="video/*">
-                            <?php if (!empty($movie['trailer_file'])) : ?>
-                                <span class="current-file-display">Current: <?php echo htmlspecialchars($movie['trailer_file']); ?></span>
-                            <?php endif; ?>
-                        </div>
-                        <?php if (!empty($movie['trailer_file'])) : ?>
-                            <small style="color: var(--text-color-light); display: block; margin-top: 5px;">Leave blank to keep current trailer or use URL.</small>
-                        <?php endif; ?>
-                    </div>
-
-                    <div class="genres-group">
-                        <label>Genres</label>
-                        <div class="genre-checkboxes">
-                            <?php foreach ($allGenres as $genre) : ?>
-                                <label>
-                                    <input type="checkbox" name="genres[]" value="<?php echo htmlspecialchars($genre); ?>" <?php echo in_array($genre, $movieGenresArray) ? 'checked' : ''; ?>>
-                                    <?php echo htmlspecialchars($genre); ?>
-                                </label>
-                            <?php endforeach; ?>
+                                <div class="form-group">
+                                    <label for="trailer_file">Movie Trailer</label>
+                                    <input type="file" id="trailer_file" name="trailer_file" accept="video/*">
+                                    <?php if (!empty($movie['trailer_file'])): ?>
+                                        <p>Current trailer: <?php echo htmlspecialchars($movie['trailer_file']); ?></p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="form-actions">
-                        <a href="indeks.php" class="cancel-btn button">Cancel</a>
-                        <button type="submit" class="submit-btn">Update Movie</button>
-                    </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Update Movie</button>
+                    <a href="indeks.php" class="btn-secondary">Cancel</a>
+                </div>
                 </form>
             </div>
         </main>

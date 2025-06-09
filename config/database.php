@@ -4,7 +4,7 @@
 $host = 'localhost';
 $dbname = 'ratingtales';
 $username = 'root';
-$password = 'root';
+$password = '';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
@@ -147,21 +147,10 @@ function getUserUploadedMovies($userId)
     return $stmt->fetchAll();
 }
 
-
-// Review Functions
-// Supports inserting a new review or updating an existing one (upsert)
 function createReview($movie_id, $user_id, $rating, $comment)
 {
     global $pdo;
-    // Using ON DUPLICATE KEY UPDATE to handle cases where a user reviews the same movie again
-    // This assumes a unique key on (movie_id, user_id) in the reviews table, which is standard practice
-    // NOTE: Our schema does *not* have a unique key on (movie_id, user_id) for reviews.
-    // Let's adjust this function to DELETE any previous review by the same user first, then INSERT.
-    // Or modify the schema to add the UNIQUE KEY. Modifying schema is better.
-    // Assume schema is updated with UNIQUE KEY unique_user_movie_review (movie_id, user_id) on reviews table.
-    // If schema cannot be changed, use DELETE + INSERT.
-
-    // Option 1: If reviews table has UNIQUE KEY (movie_id, user_id)
+ 
     $stmt = $pdo->prepare("
         INSERT INTO reviews (movie_id, user_id, rating, comment)
         VALUES (?, ?, ?, ?)
@@ -169,17 +158,11 @@ function createReview($movie_id, $user_id, $rating, $comment)
     ");
     return $stmt->execute([$movie_id, $user_id, $rating, $comment]);
 
-    /*
-     // Option 2: If reviews table does NOT have UNIQUE KEY (movie_id, user_id) - less ideal for tracking single review per user
-     $stmt = $pdo->prepare("INSERT INTO reviews (movie_id, user_id, rating, comment) VALUES (?, ?, ?, ?)");
-     return $stmt->execute([$movie_id, $user_id, $rating, $comment]);
-     */
 }
 
 function getMovieReviews($movieId)
 {
     global $pdo;
-    // Fetch reviews along with reviewer's username and profile image
     $stmt = $pdo->prepare("
         SELECT
             r.*,
@@ -194,11 +177,10 @@ function getMovieReviews($movieId)
     return $stmt->fetchAll();
 }
 
-// Favorite Functions
 function addToFavorites($movie_id, $user_id)
 {
     global $pdo;
-    // Use INSERT IGNORE to prevent errors if the favorite already exists (due to UNIQUE KEY)
+
     $stmt = $pdo->prepare("INSERT IGNORE INTO favorites (movie_id, user_id) VALUES (?, ?)");
     return $stmt->execute([$movie_id, $user_id]);
 }
@@ -213,7 +195,6 @@ function removeFromFavorites($movie_id, $user_id)
 function getUserFavorites($userId)
 {
     global $pdo;
-    // Fetch user favorites along with genres and average rating
     $stmt = $pdo->prepare("
         SELECT
             m.*,
@@ -230,7 +211,6 @@ function getUserFavorites($userId)
     return $stmt->fetchAll();
 }
 
-// Helper function to calculate average rating for a movie
 function getMovieAverageRating($movieId)
 {
     global $pdo;
